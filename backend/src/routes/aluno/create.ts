@@ -1,6 +1,8 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { prisma } from "../lib/prisma.js";
+import { prisma } from "../../lib/prisma.js";
+import { Prisma } from "@prisma/client";
+import { encrypt } from "../../lib/crypto.js";
 
 const createAlunoSchema = z.object({
   email: z.email(),
@@ -23,16 +25,35 @@ export async function createAluno(app: FastifyInstance) {
 
       const data = createAlunoSchema.parse(body);
 
+      const usuarioExiste = await prisma.usuario.findUnique({
+        where: {
+          email: data.email,
+        },
+      });
+
+      if (usuarioExiste) {
+        return reply.status(409).send({
+          message: "Este email já está em uso",
+        });
+      }
+
+      //Criptografando os dados
+
+      const hashSenha = await encrypt(data.senha);
+      const hashNome = await encrypt(data.nome);
+      const hashCurso = await encrypt(data.curso);
+      const hashTelefone = await encrypt(data.telefone);
+
       const usuario = await prisma.usuario.create({
         data: {
           email: data.email,
-          senha: data.senha,
+          senha: hashSenha,
           perfil: "ALUNO",
           aluno: {
             create: {
-              nome: data.nome,
-              curso: data.curso,
-              telefone: data.telefone,
+              nome: hashNome,
+              curso: hashCurso,
+              telefone: hashTelefone,
             },
           },
         },
@@ -47,6 +68,14 @@ export async function createAluno(app: FastifyInstance) {
         return reply.status(400).send({
           message: "Dados inválidos",
           errors: error.flatten().fieldErrors,
+        });
+      }
+
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        return reply.status(409).send({
+          errors: {
+            email: "Este email já está em uso",
+          },
         });
       }
 
