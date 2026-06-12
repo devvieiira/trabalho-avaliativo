@@ -1,0 +1,93 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+enum TipoPerfil {
+  ALUNO
+  EMPRESA
+  ADMIN
+}
+
+enum StatusAprovacao {
+  PENDENTE
+  APROVADA
+  REPROVADA
+}
+
+enum StatusVaga {
+  ABERTA
+  PREENCHIDA
+  CANCELADA
+}
+
+
+model Usuario {
+  id        String     @id @default(uuid())
+  email     String     @unique 
+  senha     String    
+  perfil    TipoPerfil
+  ativo     Boolean    @default(true) 
+  criadoEm  DateTime   @default(now())
+
+  aluno     Aluno?
+  empresa   Empresa?
+  admin     Admin?
+}
+
+model Aluno {
+  id          String  @id @default(uuid())
+  usuarioId   String  @unique
+  usuario     Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  
+  nome        String
+  curso       String 
+  telefone    String?
+}
+
+model Empresa {
+  id              String          @id @default(uuid())
+  usuarioId       String          @unique
+  usuario         Usuario         @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  
+  razaoSocial     String
+  cnpj            String          @unique
+  statusCadastro  StatusAprovacao @default(PENDENTE)
+  
+  vagas           Vaga[]
+}
+
+model Admin {
+  id          String  @id @default(uuid())
+  usuarioId   String  @unique
+  usuario     Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  
+  nome        String
+  setor       String?
+}
+
+model Vaga {
+  id                 String     @id @default(uuid())
+  empresaId          String
+  empresa            Empresa    @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  
+  titulo             String
+  descricao          String       
+  cursoAlvo          String     
+  cidade             String     
+  
+  informacoesContato String     
+  status             StatusVaga @default(ABERTA) 
+  
+  criadoEm           DateTime   @default(now())
+  atualizadoEm       DateTime   @updatedAt
+}
