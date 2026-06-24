@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { prisma } from "../../lib/prisma.js";
-import { compareHash } from "../../lib/crypto.js";
+import { compareHash, decrypt } from "../../lib/crypto.js";
 
 const loginSchema = z.object({
   email: z.string().email("Formato de e-mail inválido"),
@@ -21,17 +21,23 @@ export async function loginRoute(app: FastifyInstance) {
 
       const data = loginSchema.parse(body);
 
+      console.log(data.email);
+
       const usuario = await prisma.usuario.findUnique({
         where: {
           email: data.email,
         },
       });
 
+      console.log(usuario);
+
       if (!usuario) {
         return reply.status(401).send({
           message: "Credenciais inválidas.",
         });
       }
+
+      console.log("chega 1");
 
       if (!usuario.ativo) {
         return reply.status(403).send({
@@ -40,11 +46,11 @@ export async function loginRoute(app: FastifyInstance) {
         });
       }
 
-      const senhaValida = await compareHash(data.senha, usuario.senha);
+      const senhaValida = data.senha === (await decrypt(usuario.senha));
 
       if (!senhaValida) {
         return reply.status(401).send({
-          message: "Credenciais inválidas.",
+          message: "Credenciais inválidas. (senha)",
         });
       }
 

@@ -2,7 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { prisma } from "../../lib/prisma.js";
 import { Prisma } from "@prisma/client";
-import { encrypt } from "../../lib/crypto.js";
+import { encrypt, hashing } from "../../lib/crypto.js";
 
 const createAlunoSchema = z.object({
   email: z.email(),

@@ -11,12 +11,12 @@ export async function compareHash(data: string, has: string) {
   return await bcrypt.compare(data, has);
 }
 export async function encrypt(data: string, keyOf: string = key) {
-  const encrypted = cryptojs.AES.encrypt(data, key).toString();
+  const encrypted = cryptojs.AES.encrypt(data, keyOf).toString();
   return encrypted;
 }
 
-export async function decrypt(encrypted: string) {
-  const decrypted = cryptojs.AES.decrypt(encrypted, key).toString(
+export async function decrypt(encrypted: string, keyOf: string = key) {
+  const decrypted = cryptojs.AES.decrypt(encrypted, keyOf).toString(
     cryptojs.enc.Utf8,
   );
 
