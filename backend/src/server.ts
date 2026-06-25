@@ -11,6 +11,7 @@ import { createEmpresa } from "./routes/empresa/create.js";
 import { createVaga } from "./routes/vaga/create.js";
 import { updateVaga } from "./routes/vaga/update.js";
 import { deleteVaga } from "./routes/vaga/delete.js";
+import { adminRoutes } from "./routes/admin/index.js";
 
 const app = fastify();
 console.log("DATABASE_URL:", process.env.DATABASE_URL);
@@ -31,6 +32,7 @@ app.register(async (instance) => {
   instance.register(createVaga);
   instance.register(updateVaga);
   instance.register(deleteVaga);
+  instance.register(adminRoutes);
 });
 
 app.listen({ port: 4000, host: "0.0.0.0" }, (err, address) => {
