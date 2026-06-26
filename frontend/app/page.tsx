@@ -1,7 +1,33 @@
 import Link from "next/link";
-import { Search, Briefcase, Users, Building2, GraduationCap } from "lucide-react";
+import { cookies } from "next/headers";
+import {
+  Search,
+  Briefcase,
+  Users,
+  Building2,
+  GraduationCap,
+  UserCircle,
+  LayoutDashboard,
+  LogOut,
+  Settings,
+} from "lucide-react";
 
-export default function Home() {
+export default async function Home() {
+  const cookieStore = await cookies();
+
+  const token = cookieStore.get("token");
+  const perfil = cookieStore.get("perfil")?.value;
+  const nome = cookieStore.get("nome")?.value;
+
+  const logado = !!token;
+
+  const dashboardLink =
+    perfil === "EMPRESA"
+      ? "/empresa/dashboard"
+      : perfil === "ADMIN"
+        ? "/admin/dashboard"
+        : "/aluno/dashboard";
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -10,21 +36,88 @@ export default function Home() {
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center">
               <GraduationCap className="h-8 w-8 text-green-600 mr-2" />
-              <h1 className="text-2xl font-bold text-gray-900">IFRS Estágios</h1>
+              <h1 className="text-2xl font-bold text-gray-900">
+                IFRS Estágios
+              </h1>
             </div>
-            <nav className="flex space-x-8">
-              <Link href="/vagas" className="text-gray-500 hover:text-gray-900">
+
+            <nav className="flex items-center gap-6">
+              <Link
+                href="/vagas"
+                className="text-gray-600 hover:text-green-600 transition"
+              >
                 Ver Vagas
               </Link>
-              <Link href="/login" className="text-gray-500 hover:text-gray-900">
-                Entrar
-              </Link>
+
+              {!logado ? (
+                <Link
+                  href="/login"
+                  className="text-gray-600 hover:text-green-600 transition"
+                >
+                  Entrar
+                </Link>
+              ) : (
+                <details className="relative">
+                  <summary className="list-none cursor-pointer">
+                    <div className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-gray-100 transition">
+                      <UserCircle className="h-9 w-9 text-green-600" />
+
+                      <div className="hidden md:block text-left">
+                        <p className="text-sm font-semibold text-gray-900">
+                          {nome}
+                        </p>
+
+                        <p className="text-xs text-gray-500 capitalize">
+                          {perfil?.toLowerCase()}
+                        </p>
+                      </div>
+                    </div>
+                  </summary>
+
+                  <div className="absolute right-0 mt-2 w-60 rounded-xl border bg-white shadow-xl overflow-hidden z-50">
+                    <div className="px-4 py-4 border-b bg-gray-50">
+                      <div className="flex items-center gap-3">
+                        <UserCircle className="h-10 w-10 text-green-600" />
+
+                        <div>
+                          <p className="font-semibold">{nome}</p>
+                          <p className="text-sm text-gray-500">{perfil}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <Link
+                      href={dashboardLink}
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100"
+                    >
+                      <LayoutDashboard className="h-4 w-4" />
+                      Dashboard
+                    </Link>
+
+                    <Link
+                      href="/perfil"
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100"
+                    >
+                      <Settings className="h-4 w-4" />
+                      Editar Perfil
+                    </Link>
+
+                    <Link
+                      href="/api/auth/logout"
+                      className="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Sair
+                    </Link>
+                  </div>
+                </details>
+              )}
             </nav>
           </div>
         </div>
       </header>
 
-      {/* Hero Section */}
+      {/* Hero */}
       <main>
         <div className="relative bg-white overflow-hidden">
           <div className="max-w-7xl mx-auto">
@@ -32,139 +125,143 @@ export default function Home() {
               <div className="pt-10 mx-auto max-w-7xl px-4 sm:pt-12 sm:px-6 md:pt-16 lg:pt-20 lg:px-8 xl:pt-28">
                 <div className="sm:text-center lg:text-left">
                   <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
-                    <span className="block xl:inline">Encontre seu</span>
-                    <span className="block text-green-600 xl:inline"> estágio ideal</span>
+                    <span className="block xl:inline">Encontre seu</span>{" "}
+                    <span className="block text-green-600 xl:inline">
+                      estágio ideal
+                    </span>
                   </h1>
-                  <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
-                    Sistema de vagas de estágio curricular obrigatório do IFRS Campus Feliz. 
-                    Conectando alunos e empresas para oportunidades de crescimento profissional.
+
+                  <p className="mt-5 text-lg text-gray-500">
+                    Sistema de vagas de estágio curricular obrigatório do IFRS
+                    Campus Feliz, conectando estudantes e empresas para novas
+                    oportunidades profissionais.
                   </p>
-                  <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
-                    <div className="rounded-md shadow">
-                      <Link
-                        href="/vagas"
-                        className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 md:py-4 md:text-lg md:px-10"
-                      >
-                        <Search className="mr-2 h-5 w-5" />
-                        Explorar Vagas
-                      </Link>
-                    </div>
-                    <div className="mt-3 sm:mt-0 sm:ml-3">
+
+                  <div className="mt-8 flex flex-wrap gap-4">
+                    <Link
+                      href="/vagas"
+                      className="flex items-center px-8 py-3 rounded-md bg-green-600 text-white hover:bg-green-700"
+                    >
+                      <Search className="mr-2 h-5 w-5" />
+                      Explorar Vagas
+                    </Link>
+
+                    {!logado && (
                       <Link
                         href="/empresa/cadastro"
-                        className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-green-700 bg-blue-100 hover:bg-blue-200 md:py-4 md:text-lg md:px-10"
+                        className="flex items-center px-8 py-3 rounded-md bg-blue-100 text-blue-700 hover:bg-blue-200"
                       >
                         <Building2 className="mr-2 h-5 w-5" />
                         Cadastrar Empresa
                       </Link>
-                    </div>
+                    )}
+
+                    {logado && (
+                      <Link
+                        href={dashboardLink}
+                        className="flex items-center px-8 py-3 rounded-md bg-gray-800 text-white hover:bg-gray-900"
+                      >
+                        Ir para meu Dashboard
+                      </Link>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
           </div>
+
           <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
-            <div className="h-56 w-full bg-linear-to-r from-green-500 to-green  -600 sm:h-72 md:h-96 lg:w-full lg:h-full flex items-center justify-center">
+            <div className="h-56 w-full bg-gradient-to-r from-green-500 to-green-700 sm:h-72 md:h-96 lg:h-full flex items-center justify-center">
               <Briefcase className="h-32 w-32 text-white opacity-50" />
             </div>
           </div>
         </div>
 
-        {/* Stats Section */}
+        {/* Estatísticas */}
         <div className="bg-green-600">
-          <div className="max-w-7xl mx-auto py-12 px-4 sm:py-16 sm:px-6 lg:px-8 lg:py-20">
-            <div className="max-w-4xl mx-auto text-center">
-              <h2 className="text-3xl font-extrabold text-white sm:text-4xl">
+          <div className="max-w-7xl mx-auto py-16 px-4">
+            <div className="text-center">
+              <h2 className="text-4xl font-bold text-white">
                 Conectando talentos com oportunidades
               </h2>
-              <p className="mt-3 text-xl text-blue-200 sm:mt-4">
-                Facilitamos a conexão entre estudantes e empresas
+
+              <p className="mt-3 text-green-100 text-xl">
+                Facilitamos a conexão entre estudantes e empresas.
               </p>
             </div>
-            <dl className="mt-10 text-center sm:max-w-3xl sm:mx-auto sm:grid sm:grid-cols-3 sm:gap-8">
-              <div className="flex flex-col">
-                <dt className="order-2 mt-2 text-lg leading-6 font-medium text-blue-200">
-                  Vagas Ativas
-                </dt>
-                <dd className="order-1 text-5xl font-extrabold text-white">50+</dd>
+
+            <div className="grid md:grid-cols-3 gap-10 mt-12 text-center">
+              <div>
+                <p className="text-5xl font-bold text-white">50+</p>
+                <p className="text-green-100 mt-2">Vagas Ativas</p>
               </div>
-              <div className="flex flex-col mt-10 sm:mt-0">
-                <dt className="order-2 mt-2 text-lg leading-6 font-medium text-green-200">
-                  Empresas Parceiras
-                </dt>
-                <dd className="order-1 text-5xl font-extrabold text-white">25+</dd>
+
+              <div>
+                <p className="text-5xl font-bold text-white">25+</p>
+                <p className="text-green-100 mt-2">Empresas Parceiras</p>
               </div>
-              <div className="flex flex-col mt-10 sm:mt-0">
-                <dt className="order-2 mt-2 text-lg leading-6 font-medium text-green-200">
-                  Alunos Beneficiados
-                </dt>
-                <dd className="order-1 text-5xl font-extrabold text-white">200+</dd>
+
+              <div>
+                <p className="text-5xl font-bold text-white">200+</p>
+                <p className="text-green-100 mt-2">Alunos Beneficiados</p>
               </div>
-            </dl>
+            </div>
           </div>
         </div>
 
-        {/* Features Section */}
-        <div className="py-12 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="lg:text-center">
-              <h2 className="text-base text-green-600 font-semibold tracking-wide uppercase">
+        {/* Funcionalidades */}
+        <div className="py-16 bg-white">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="text-center">
+              <h2 className="text-green-600 uppercase font-semibold">
                 Como funciona
               </h2>
-              <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
-                Para cada perfil de usuário
-              </p>
+
+              <h3 className="mt-2 text-4xl font-bold">Um sistema para todos</h3>
             </div>
 
-            <div className="mt-10">
-              <div className="space-y-10 md:space-y-0 md:grid md:grid-cols-3 md:gap-x-8 md:gap-y-10">
-                <div className="relative">
-                  <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-green-500 text-white">
-                    <GraduationCap className="h-6 w-6" />
-                  </div>
-                  <p className="ml-16 text-lg leading-6 font-medium text-gray-900">Para Alunos</p>
-                  <dd className="mt-2 ml-16 text-base text-gray-500">
-                    Consulte vagas disponíveis, filtre por curso e cidade, e visualize detalhes com seu email institucional.
-                  </dd>
-                </div>
+            <div className="grid md:grid-cols-3 gap-10 mt-14">
+              <div className="p-6 rounded-xl border hover:shadow-lg transition">
+                <GraduationCap className="text-green-600 h-10 w-10 mb-4" />
+                <h4 className="font-bold text-xl">Aluno</h4>
+                <p className="mt-3 text-gray-600">
+                  Consulte vagas, visualize detalhes e mantenha seu perfil
+                  atualizado.
+                </p>
+              </div>
 
-                <div className="relative">
-                  <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-blue-500 text-white">
-                    <Building2 className="h-6 w-6" />
-                  </div>
-                  <p className="ml-16 text-lg leading-6 font-medium text-gray-900">Para Empresas</p>
-                  <dd className="mt-2 ml-16 text-base text-gray-500">
-                    Cadastre vagas, gerencie suas oportunidades e encontre os melhores candidatos.
-                  </dd>
-                </div>
+              <div className="p-6 rounded-xl border hover:shadow-lg transition">
+                <Building2 className="text-blue-600 h-10 w-10 mb-4" />
+                <h4 className="font-bold text-xl">Empresa</h4>
+                <p className="mt-3 text-gray-600">
+                  Cadastre vagas, edite oportunidades e marque vagas como
+                  preenchidas.
+                </p>
+              </div>
 
-                <div className="relative">
-                  <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-blue-500 text-white">
-                    <Users className="h-6 w-6" />
-                  </div>
-                  <p className="ml-16 text-lg leading-6 font-medium text-gray-900">Para Administradores</p>
-                  <dd className="mt-2 ml-16 text-base text-gray-500">
-                    Gerencie usuários, aprove empresas e monitore todas as atividades do sistema.
-                  </dd>
-                </div>
+              <div className="p-6 rounded-xl border hover:shadow-lg transition">
+                <Users className="text-purple-600 h-10 w-10 mb-4" />
+                <h4 className="font-bold text-xl">Administrador</h4>
+                <p className="mt-3 text-gray-600">
+                  Gerencie usuários, empresas e acompanhe todo o sistema.
+                </p>
               </div>
             </div>
           </div>
         </div>
       </main>
 
-      {/* Footer */}
+      {/* Rodapé */}
       <footer className="bg-gray-800">
-        <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <GraduationCap className="h-8 w-8 text-white mr-2" />
-              <p className="text-white text-lg font-semibold">IFRS Campus Feliz</p>
-            </div>
-            <p className="text-gray-400">
-              © 2026 Sistema de Estágios. Todos os direitos reservados.
-            </p>
+        <div className="max-w-7xl mx-auto py-10 px-4 flex justify-between items-center">
+          <div className="flex items-center">
+            <GraduationCap className="h-8 w-8 text-white mr-2" />
+            <p className="text-white font-semibold">IFRS Campus Feliz</p>
           </div>
+
+          <p className="text-gray-400">
+            © 2026 Sistema de Estágios. Todos os direitos reservados.
+          </p>
         </div>
       </footer>
     </div>
