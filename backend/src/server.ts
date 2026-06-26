@@ -12,11 +12,22 @@ import { createVaga } from "./routes/vaga/create.js";
 import { updateVaga } from "./routes/vaga/update.js";
 import { deleteVaga } from "./routes/vaga/delete.js";
 import { adminRoutes } from "./routes/admin/index.js";
+import cors from "@fastify/cors";
+import { meRoute } from "./routes/usuarios/me.js";
+import { readVaga } from "./routes/vaga/read.js";
+import { readOneVaga } from "./routes/vaga/readOne.js";
+import { readEmpresaVaga } from "./routes/vaga/readEmpresa.js";
 
 const app = fastify();
 console.log("DATABASE_URL:", process.env.DATABASE_URL);
 
 app.register(fastifyMultipart);
+
+await app.register(cors, {
+  origin: "http://localhost:3000",
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+});
 
 app.register(fjwt, {
   secret: process.env.JWT_ASSIGN || "secret-key",
@@ -33,6 +44,10 @@ app.register(async (instance) => {
   instance.register(updateVaga);
   instance.register(deleteVaga);
   instance.register(adminRoutes);
+  instance.register(meRoute);
+  instance.register(readVaga);
+  instance.register(readOneVaga);
+  instance.register(readEmpresaVaga);
 });
 
 app.listen({ port: 4000, host: "0.0.0.0" }, (err, address) => {

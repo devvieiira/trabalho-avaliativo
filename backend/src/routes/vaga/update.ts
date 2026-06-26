@@ -14,6 +14,7 @@ const updateVagaSchema = z.object({
   cursoAlvo: z.string().min(1).optional(),
   cidade: z.string().min(1).optional(),
   informacoesContato: z.string().min(1).optional(),
+  status: z.enum(["ABERTA", "PREENCHIDA"]).optional(),
 });
 
 const paramsSchema = z.object({
@@ -88,7 +89,14 @@ export async function updateVaga(app: FastifyInstance) {
         });
       }
 
-      const dataToUpdate: Record<string, string> = {};
+      const dataToUpdate: {
+        titulo?: string;
+        descricao?: string;
+        cursoAlvo?: string;
+        cidade?: string;
+        informacoesContato?: string;
+        status?: "ABERTA" | "PREENCHIDA";
+      } = {};
 
       if (data.titulo) dataToUpdate.titulo = data.titulo;
       if (data.descricao) dataToUpdate.descricao = data.descricao;
@@ -96,6 +104,9 @@ export async function updateVaga(app: FastifyInstance) {
       if (data.cidade) dataToUpdate.cidade = data.cidade;
       if (data.informacoesContato) {
         dataToUpdate.informacoesContato = data.informacoesContato;
+      }
+      if (data.status) {
+        dataToUpdate.status = data.status;
       }
 
       const vagaAtualizada = await prisma.vaga.update({

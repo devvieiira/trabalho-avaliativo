@@ -8,6 +8,9 @@ export async function readOne(app: FastifyInstance) {
       const { idAluno } = request.params as { idAluno: string };
       const dbData = await prisma.aluno.findUnique({
         where: { id: idAluno },
+        include: {
+          usuario: true,
+        },
       });
 
       if (!dbData) {
@@ -17,10 +20,11 @@ export async function readOne(app: FastifyInstance) {
       }
 
       const aluno = {
-        ...dbData,
+        id: dbData.id,
         nome: await decrypt(dbData.nome),
         curso: await decrypt(dbData.curso),
         telefone: dbData.telefone ? await decrypt(dbData.telefone) : null,
+        email: dbData.usuario.email,
       };
 
       return reply.status(200).send({

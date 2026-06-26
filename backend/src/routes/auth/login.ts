@@ -27,6 +27,11 @@ export async function loginRoute(app: FastifyInstance) {
         where: {
           email: data.email,
         },
+        include: {
+          aluno: true,
+          empresa: true,
+          admin: true,
+        },
       });
 
       console.log(usuario);
@@ -46,12 +51,30 @@ export async function loginRoute(app: FastifyInstance) {
         });
       }
 
+      console.log(usuario.senha);
+
       const senhaValida = data.senha === (await decrypt(usuario.senha));
+
+      console.log(senhaValida);
 
       if (!senhaValida) {
         return reply.status(401).send({
           message: "Credenciais inválidas. (senha)",
         });
+      }
+
+      let nome: string | null = null;
+
+      if (usuario.aluno) {
+        nome = await decrypt(usuario.aluno.nome);
+      }
+
+      if (usuario.empresa) {
+        nome = usuario.empresa.razaoSocial;
+      }
+
+      if (usuario.admin) {
+        nome = usuario.admin.nome;
       }
 
       const token = app.jwt.sign(
@@ -69,6 +92,7 @@ export async function loginRoute(app: FastifyInstance) {
         token,
         usuario: {
           id: usuario.id,
+          nome,
           email: usuario.email,
           perfil: usuario.perfil,
         },
