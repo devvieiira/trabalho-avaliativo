@@ -1,46 +1,120 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Save, GraduationCap, Building2 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function NovaVagaPage() {
   const [formData, setFormData] = useState({
-    titulo: '',
-    curso: '',
-    cidade: '',
-    salario: '',
-    cargaHoraria: '',
-    modalidade: 'presencial',
-    descricao: '',
-    requisitos: '',
-    beneficios: '',
-    nomeContato: '',
-    emailContato: '',
-    telefoneContato: '',
-    endereco: ''
+    titulo: "",
+    curso: "",
+    cidade: "",
+    salario: "",
+    cargaHoraria: "",
+    modalidade: "presencial",
+    descricao: "",
+    requisitos: "",
+    beneficios: "",
+    nomeContato: "",
+    emailContato: "",
+    telefoneContato: "",
+    endereco: "",
   });
 
   const [carregando, setCarregando] = useState(false);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     setCarregando(true);
-    
-    // Simulação de salvamento
-    setTimeout(() => {
-      alert('Vaga criada com sucesso!');
+
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        toast.error("Sessão expirada.");
+        return;
+      }
+
+      const form = new FormData();
+
+      form.append("titulo", formData.titulo);
+      form.append(
+        "descricao",
+        `
+Descrição:
+${formData.descricao}
+
+Requisitos:
+${formData.requisitos}
+
+Benefícios:
+${formData.beneficios}
+
+Bolsa:
+${formData.salario}
+
+Carga Horária:
+${formData.cargaHoraria}
+
+Modalidade:
+${formData.modalidade}
+    `,
+      );
+
+      form.append("cursoAlvo", formData.curso);
+
+      form.append("cidade", formData.cidade);
+
+      form.append(
+        "informacoesContato",
+        `
+Responsável: ${formData.nomeContato}
+Email: ${formData.emailContato}
+Telefone: ${formData.telefoneContato}
+Endereço: ${formData.endereco}
+      `,
+      );
+
+      const response = await fetch("http://localhost:4000/vagas", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: form,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message);
+      }
+
+      toast.success("Vaga criada com sucesso!");
+
+      window.location.href = "/empresa/vagas";
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Erro ao criar vaga.");
+      }
+    } finally {
       setCarregando(false);
-      // Redirecionar para lista de vagas
-    }, 2000);
+    }
   };
 
   const cursos = [
@@ -49,7 +123,7 @@ export default function NovaVagaPage() {
     "Publicidade e Propaganda",
     "Gestão Comercial",
     "Design Gráfico",
-    "Contabilidade"
+    "Contabilidade",
   ];
 
   return (
@@ -60,13 +134,21 @@ export default function NovaVagaPage() {
           <div className="flex justify-between items-center py-6">
             <Link href="/" className="flex items-center">
               <GraduationCap className="h-8 w-8 text-blue-600 mr-2" />
-              <h1 className="text-2xl font-bold text-gray-900">IFRS Estágios</h1>
+              <h1 className="text-2xl font-bold text-gray-900">
+                IFRS Estágios
+              </h1>
             </Link>
             <nav className="flex space-x-8">
-              <Link href="/empresa/vagas" className="text-gray-500 hover:text-gray-900">
+              <Link
+                href="/empresa/vagas"
+                className="text-gray-500 hover:text-gray-900"
+              >
                 Minhas Vagas
               </Link>
-              <Link href="/empresa/dashboard" className="text-gray-500 hover:text-gray-900">
+              <Link
+                href="/empresa/dashboard"
+                className="text-gray-500 hover:text-gray-900"
+              >
                 Dashboard
               </Link>
               <Link href="/login" className="text-gray-500 hover:text-gray-900">
@@ -98,13 +180,21 @@ export default function NovaVagaPage() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white shadow rounded-lg p-6 space-y-8">
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white shadow rounded-lg p-6 space-y-8"
+        >
           {/* Informações Básicas */}
           <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Informações da Vaga</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              Informações da Vaga
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
-                <label htmlFor="titulo" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="titulo"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Título da Vaga *
                 </label>
                 <input
@@ -120,7 +210,10 @@ export default function NovaVagaPage() {
               </div>
 
               <div>
-                <label htmlFor="curso" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="curso"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Curso *
                 </label>
                 <select
@@ -132,14 +225,19 @@ export default function NovaVagaPage() {
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="">Selecione um curso</option>
-                  {cursos.map(curso => (
-                    <option key={curso} value={curso}>{curso}</option>
+                  {cursos.map((curso) => (
+                    <option key={curso} value={curso}>
+                      {curso}
+                    </option>
                   ))}
                 </select>
               </div>
 
               <div>
-                <label htmlFor="cidade" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="cidade"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Cidade *
                 </label>
                 <input
@@ -155,7 +253,10 @@ export default function NovaVagaPage() {
               </div>
 
               <div>
-                <label htmlFor="salario" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="salario"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Bolsa Auxílio (opcional)
                 </label>
                 <input
@@ -170,7 +271,10 @@ export default function NovaVagaPage() {
               </div>
 
               <div>
-                <label htmlFor="cargaHoraria" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="cargaHoraria"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Carga Horária *
                 </label>
                 <input
@@ -186,7 +290,10 @@ export default function NovaVagaPage() {
               </div>
 
               <div>
-                <label htmlFor="modalidade" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="modalidade"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Modalidade *
                 </label>
                 <select
@@ -207,10 +314,15 @@ export default function NovaVagaPage() {
 
           {/* Descrição e Detalhes */}
           <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Descrição e Requisitos</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              Descrição e Requisitos
+            </h2>
             <div className="space-y-6">
               <div>
-                <label htmlFor="descricao" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="descricao"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Descrição da Vaga *
                 </label>
                 <textarea
@@ -226,7 +338,10 @@ export default function NovaVagaPage() {
               </div>
 
               <div>
-                <label htmlFor="requisitos" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="requisitos"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Requisitos *
                 </label>
                 <textarea
@@ -242,7 +357,10 @@ export default function NovaVagaPage() {
               </div>
 
               <div>
-                <label htmlFor="beneficios" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="beneficios"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Benefícios (opcional)
                 </label>
                 <textarea
@@ -260,10 +378,15 @@ export default function NovaVagaPage() {
 
           {/* Informações de Contato */}
           <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Informações de Contato</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              Informações de Contato
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="nomeContato" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="nomeContato"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Nome do Responsável *
                 </label>
                 <input
@@ -278,7 +401,10 @@ export default function NovaVagaPage() {
               </div>
 
               <div>
-                <label htmlFor="emailContato" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="emailContato"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   E-mail de Contato *
                 </label>
                 <input
@@ -293,7 +419,10 @@ export default function NovaVagaPage() {
               </div>
 
               <div>
-                <label htmlFor="telefoneContato" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="telefoneContato"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Telefone de Contato *
                 </label>
                 <input
@@ -309,7 +438,10 @@ export default function NovaVagaPage() {
               </div>
 
               <div>
-                <label htmlFor="endereco" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="endereco"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Endereço *
                 </label>
                 <input
@@ -340,7 +472,7 @@ export default function NovaVagaPage() {
               className="inline-flex items-center px-6 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Save className="h-4 w-4 mr-2" />
-              {carregando ? 'Salvando...' : 'Publicar Vaga'}
+              {carregando ? "Salvando..." : "Publicar Vaga"}
             </button>
           </div>
         </form>

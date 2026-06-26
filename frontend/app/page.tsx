@@ -1,32 +1,29 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import {
   Search,
   Briefcase,
   Users,
   Building2,
   GraduationCap,
-  UserCircle,
-  LayoutDashboard,
-  LogOut,
-  Settings,
 } from "lucide-react";
+import Navbar from "@/components/Navbar";
 
 export default async function Home() {
   const cookieStore = await cookies();
 
   const token = cookieStore.get("token");
   const perfil = cookieStore.get("perfil")?.value;
-  const nome = cookieStore.get("nome")?.value;
+
+  // Se estiver logado e não for aluno, envia para a área da empresa
+  if (token && perfil !== "ALUNO") {
+    redirect("/empresa/vagas");
+  }
 
   const logado = !!token;
 
-  const dashboardLink =
-    perfil === "EMPRESA"
-      ? "/empresa/dashboard"
-      : perfil === "ADMIN"
-        ? "/admin/dashboard"
-        : "/aluno/dashboard";
+  const dashboardLink = "/aluno/dashboard";
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -41,78 +38,7 @@ export default async function Home() {
               </h1>
             </div>
 
-            <nav className="flex items-center gap-6">
-              <Link
-                href="/vagas"
-                className="text-gray-600 hover:text-green-600 transition"
-              >
-                Ver Vagas
-              </Link>
-
-              {!logado ? (
-                <Link
-                  href="/login"
-                  className="text-gray-600 hover:text-green-600 transition"
-                >
-                  Entrar
-                </Link>
-              ) : (
-                <details className="relative">
-                  <summary className="list-none cursor-pointer">
-                    <div className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-gray-100 transition">
-                      <UserCircle className="h-9 w-9 text-green-600" />
-
-                      <div className="hidden md:block text-left">
-                        <p className="text-sm font-semibold text-gray-900">
-                          {nome}
-                        </p>
-
-                        <p className="text-xs text-gray-500 capitalize">
-                          {perfil?.toLowerCase()}
-                        </p>
-                      </div>
-                    </div>
-                  </summary>
-
-                  <div className="absolute right-0 mt-2 w-60 rounded-xl border bg-white shadow-xl overflow-hidden z-50">
-                    <div className="px-4 py-4 border-b bg-gray-50">
-                      <div className="flex items-center gap-3">
-                        <UserCircle className="h-10 w-10 text-green-600" />
-
-                        <div>
-                          <p className="font-semibold">{nome}</p>
-                          <p className="text-sm text-gray-500">{perfil}</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <Link
-                      href={dashboardLink}
-                      className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100"
-                    >
-                      <LayoutDashboard className="h-4 w-4" />
-                      Dashboard
-                    </Link>
-
-                    <Link
-                      href="/perfil"
-                      className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100"
-                    >
-                      <Settings className="h-4 w-4" />
-                      Editar Perfil
-                    </Link>
-
-                    <Link
-                      href="/api/auth/logout"
-                      className="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      Sair
-                    </Link>
-                  </div>
-                </details>
-              )}
-            </nav>
+            <Navbar />
           </div>
         </div>
       </header>
@@ -170,81 +96,77 @@ export default async function Home() {
             </div>
           </div>
 
-          <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
-            <div className="h-56 w-full bg-gradient-to-r from-green-500 to-green-700 sm:h-72 md:h-96 lg:h-full flex items-center justify-center">
-              <Briefcase className="h-32 w-32 text-white opacity-50" />
-            </div>
-          </div>
-        </div>
+          {/* Estatísticas */}
+          <div className="bg-green-600">
+            <div className="max-w-7xl mx-auto py-16 px-4">
+              <div className="text-center">
+                <h2 className="text-4xl font-bold text-white">
+                  Conectando talentos com oportunidades
+                </h2>
 
-        {/* Estatísticas */}
-        <div className="bg-green-600">
-          <div className="max-w-7xl mx-auto py-16 px-4">
-            <div className="text-center">
-              <h2 className="text-4xl font-bold text-white">
-                Conectando talentos com oportunidades
-              </h2>
-
-              <p className="mt-3 text-green-100 text-xl">
-                Facilitamos a conexão entre estudantes e empresas.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-10 mt-12 text-center">
-              <div>
-                <p className="text-5xl font-bold text-white">50+</p>
-                <p className="text-green-100 mt-2">Vagas Ativas</p>
+                <p className="mt-3 text-green-100 text-xl">
+                  Facilitamos a conexão entre estudantes e empresas.
+                </p>
               </div>
 
-              <div>
-                <p className="text-5xl font-bold text-white">25+</p>
-                <p className="text-green-100 mt-2">Empresas Parceiras</p>
-              </div>
+              <div className="grid md:grid-cols-3 gap-10 mt-12 text-center">
+                <div>
+                  <p className="text-5xl font-bold text-white">50+</p>
+                  <p className="text-green-100 mt-2">Vagas Ativas</p>
+                </div>
 
-              <div>
-                <p className="text-5xl font-bold text-white">200+</p>
-                <p className="text-green-100 mt-2">Alunos Beneficiados</p>
+                <div>
+                  <p className="text-5xl font-bold text-white">25+</p>
+                  <p className="text-green-100 mt-2">Empresas Parceiras</p>
+                </div>
+
+                <div>
+                  <p className="text-5xl font-bold text-white">200+</p>
+                  <p className="text-green-100 mt-2">Alunos Beneficiados</p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Funcionalidades */}
-        <div className="py-16 bg-white">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="text-center">
-              <h2 className="text-green-600 uppercase font-semibold">
-                Como funciona
-              </h2>
+          {/* Funcionalidades */}
+          <div className="py-16 bg-white">
+            <div className="max-w-7xl mx-auto px-4">
+              <div className="text-center">
+                <h2 className="text-green-600 uppercase font-semibold">
+                  Como funciona
+                </h2>
 
-              <h3 className="mt-2 text-4xl font-bold">Um sistema para todos</h3>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-10 mt-14">
-              <div className="p-6 rounded-xl border hover:shadow-lg transition">
-                <GraduationCap className="text-green-600 h-10 w-10 mb-4" />
-                <h4 className="font-bold text-xl">Aluno</h4>
-                <p className="mt-3 text-gray-600">
-                  Consulte vagas, visualize detalhes e mantenha seu perfil
-                  atualizado.
-                </p>
+                <h3 className="mt-2 text-4xl font-bold">
+                  Um sistema para todos
+                </h3>
               </div>
 
-              <div className="p-6 rounded-xl border hover:shadow-lg transition">
-                <Building2 className="text-blue-600 h-10 w-10 mb-4" />
-                <h4 className="font-bold text-xl">Empresa</h4>
-                <p className="mt-3 text-gray-600">
-                  Cadastre vagas, edite oportunidades e marque vagas como
-                  preenchidas.
-                </p>
-              </div>
+              <div className="grid md:grid-cols-3 gap-10 mt-14">
+                <div className="p-6 rounded-xl border hover:shadow-lg transition">
+                  <GraduationCap className="text-green-600 h-10 w-10 mb-4" />
+                  <h4 className="font-bold text-xl">Aluno</h4>
+                  <p className="mt-3 text-gray-600">
+                    Consulte vagas, visualize detalhes e mantenha seu perfil
+                    atualizado.
+                  </p>
+                </div>
 
-              <div className="p-6 rounded-xl border hover:shadow-lg transition">
-                <Users className="text-purple-600 h-10 w-10 mb-4" />
-                <h4 className="font-bold text-xl">Administrador</h4>
-                <p className="mt-3 text-gray-600">
-                  Gerencie usuários, empresas e acompanhe todo o sistema.
-                </p>
+                <div className="p-6 rounded-xl border hover:shadow-lg transition">
+                  <Building2 className="text-blue-600 h-10 w-10 mb-4" />
+                  <h4 className="font-bold text-xl">Empresa</h4>
+                  <p className="mt-3 text-gray-600">
+                    Cadastre vagas, edite oportunidades e marque vagas como
+                    preenchidas.
+                  </p>
+                </div>
+
+                <div className="p-6 rounded-xl border hover:shadow-lg transition">
+                  <Users className="text-purple-600 h-10 w-10 mb-4" />
+                  <h4 className="font-bold text-xl">Administrador</h4>
+                  <p className="mt-3 text-gray-600">
+                    Gerencie usuários, empresas e acompanhe todo o sistema.
+                  </p>
+                </div>
               </div>
             </div>
           </div>

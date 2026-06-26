@@ -67,11 +67,20 @@ export default function LoginPage() {
         },
       );
 
-      // Apenas redireciona para a rota que salva o cookie
+      const perfil = response.data.usuario.perfil.toLowerCase();
+
+      if (perfil !== tipoUsuario) {
+        toast.error("Este usuário não pertence ao perfil selecionado.");
+        return;
+      }
+
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("perfil", response.data.usuario.perfil);
+
       router.replace(
         `/api/auth/login?access_token=${encodeURIComponent(
           response.data.token,
-        )}`,
+        )}&perfil=${response.data.usuario.perfil}`,
       );
     } catch (error: unknown) {
       if (error instanceof AxiosError) {
@@ -83,7 +92,6 @@ export default function LoginPage() {
       }
     }
   };
-
   const getPlaceholderEmail = () => {
     switch (tipoUsuario) {
       case "aluno":
