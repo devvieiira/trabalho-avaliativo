@@ -13,6 +13,7 @@ import { User, Mail, Phone, BookOpen, Save, Pencil } from "lucide-react";
 const schema = z.object({
   nome: z.string().min(1, "Informe o nome."),
   email: z.string().email("E-mail inválido."),
+  telefone: z.string().optional(),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -44,6 +45,7 @@ export default function PerfilForm({ perfil, aluno }: PerfilFormProps) {
     defaultValues: {
       nome: aluno.nome,
       email: aluno.email,
+      telefone: aluno.telefone ?? "",
     },
   });
 
@@ -59,6 +61,10 @@ export default function PerfilForm({ perfil, aluno }: PerfilFormProps) {
 
       if (data.email !== aluno.email) {
         formData.append("email", data.email);
+      }
+
+      if ((data.telefone ?? "") !== (aluno.telefone ?? "")) {
+        formData.append("telefone", data.telefone ?? "");
       }
 
       if ([...formData.keys()].length === 0) {
@@ -179,15 +185,10 @@ export default function PerfilForm({ perfil, aluno }: PerfilFormProps) {
                   <Phone className="absolute left-4 top-3.5 h-5 w-5 text-gray-400" />
 
                   <input
-                    value={aluno.telefone ?? ""}
-                    disabled
-                    className="w-full rounded-xl border border-gray-300 bg-gray-100 py-3 pl-12 pr-4 text-gray-500"
+                    {...register("telefone")}
+                    className="w-full rounded-xl border border-gray-300 py-3 pl-12 pr-4 outline-none focus:border-green-600 focus:ring-2 focus:ring-green-200"
                   />
                 </div>
-
-                <p className="mt-2 text-xs text-gray-500">
-                  O telefone não pode ser alterado.
-                </p>
               </div>
             </>
           )}
